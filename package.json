@@ -1,0 +1,15 @@
+{
+  "name": "hoa-ventures-invoice-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Invoice generator and tracker for HOA Ventures",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.46.0",
+    "nodemailer": "^6.9.11"
+  }
+}
+
