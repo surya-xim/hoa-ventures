@@ -1,0 +1,162 @@
+/* Track Page Enhancements */
+.track-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.track-summary {
+    display: flex;
+    gap: 32px;
+    background: #fff;
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--theme-border);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    align-items: center;
+}
+
+.t-sum-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.t-sum-item .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--theme-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.t-sum-item strong {
+    font-size: 20px;
+    color: var(--theme-text-main);
+    line-height: 1.2;
+}
+
+.track-controls-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    background: #fcfcfc;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--theme-border);
+}
+
+.search-group {
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-group input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-group select,
+.filter-group input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--theme-text-main);
+    font-size: 13px;
+}
+
+.text-btn {
+    background: none;
+    border: none;
+    color: #666;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.text-btn:hover {
+    color: #8B2626;
+}
+
+/* Table Improvements */
+table.sortable th {
+    cursor: pointer;
+    user-select: none;
+    background: #f8f8f8;
+    padding: 12px;
+}
+
+table.sortable th:hover {
+    background: #f0f0f0;
+}
+
+.sort-icon {
+    font-size: 10px;
+    margin-left: 4px;
+    opacity: 0.4;
+}
+
+table.sortable th.asc .sort-icon {
+    content: '↑';
+    opacity: 1;
+}
+
+table.sortable th.desc .sort-icon {
+    content: '↓';
+    opacity: 1;
+}
+
+.empty-message {
+    padding: 40px;
+    text-align: center;
+    color: var(--theme-muted);
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 1px dashed #ddd;
+    margin-top: 20px;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--theme-gold);
+    color: #8a6a1c;
+}
+
+/* Action Icons */
+.btn-icon-action {
+    padding: 6px;
+    border-radius: 6px;
+    background: #f5f5f5;
+    border: 1px solid #eee;
+    cursor: pointer;
+    margin: 0 2px;
+}
+
+.btn-icon-action:hover {
+    background: #fff;
+    border-color: #ddd;
+}
+
+@media(max-width: 800px) {
+    .track-controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-group {
+        justify-content: space-between;
+    }
+}

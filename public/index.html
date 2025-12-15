@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>HOA Ventures — Invoice Generator</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/dashboard-theme.css" />
+  <link rel="stylesheet" href="/track-theme.css" />
+  <link rel="stylesheet" href="/mobile-ios.css" />
+</head>
+
+<body>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div class="app-frame">
+    <aside class="sidebar">
+      <div class="brand brand-hoa">
+        <img src="https://hoa-invoice-bice.vercel.app/assets/LOGO%20Updating.png" alt="HOA Ventures"
+          class="brand-img" />
+      </div>
+      <div class="menu">
+        <a href="#" onclick="showPage('dashboard')" class="active">Dashboard</a>
+        <a href="#" onclick="showPage('generation')">Invoice Generation</a>
+        <a href="#" onclick="showPage('track')">Track Invoices</a>
+        <a href="#" onclick="showPage('expenses')">Expenses</a>
+      </div>
+      <div class="bottom-links">
+        <a id="helpLink">Help</a>
+        <a id="logoutLink">Logout</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <button id="menuBtn" class="btn-icon mobile-only"
+          style="font-size:24px;padding:8px;margin-right:12px">☰</button>
+        <h1>New Invoice</h1>
+        <div class="actions">
+          <input id="search" placeholder="Search" />
+          <div id="profileBtn" class="avatar" title="Profile"><!-- avatar image injected by JS if available -->MN</div>
+        </div>
+      </header>
+
+      <section id="page-generation" class="grid">
+        <section class="panel form-panel">
+          <div class="generation-block">
+            <img src="https://hoa-invoice-bice.vercel.app/assets/LOGO%20Updating.png" alt="HOA Ventures"
+              class="gen-logo" />
+            <div class="gen-config">
+              <div class="suffix">
+                <span>Invoice suffix:</span>
+                <code>HOA - </code>
+                <input type="number" id="seqStart" min="80" value="80" />
+                <button id="applySeq">Apply start</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="two-cols">
+            <div>
+              <h3>Invoice Details</h3>
+              <div class="kv">Invoice No.: <span id="invoiceNoText">HOA - 0080</span></div>
+              <label>
+                Invoice Date
+                <input type="date" id="invoiceDate" />
+              </label>
+              <label>
+                Due Date
+                <input type="date" id="dueDate" />
+              </label>
+              <input type="checkbox" id="showStamp" checked /> Show Stamp
+              </label>
+              <label class="inline">
+                <input type="checkbox" id="showTax" checked /> Show Tax
+              </label>
+            </div>
+            <div>
+              <h3>Billed To</h3>
+              <label>
+                Bill to
+                <input type="text" id="billTo" placeholder="Name or Company" />
+              </label>
+              <label>
+                Address
+                <textarea id="billAddress" placeholder="Address"></textarea>
+              </label>
+              <label>
+                Phone No.
+                <input type="tel" id="billPhone" placeholder="Phone" />
+              </label>
+              <label>
+                Job
+                <input type="text" id="billJob" placeholder="Job description" />
+              </label>
+
+              <!-- Payment Status Section -->
+              <div class="payment-status-section"
+                style="margin-top:12px; border-top:1px solid var(--border); padding-top:12px;">
+                <label style="margin-bottom:4px;color:var(--text);font-weight:600">Payment Status</label>
+                <div style="display:flex;gap:12px;margin-bottom:8px">
+                  <label class="radio-label"><input type="radio" name="paymentStatus" value="Unpaid" checked />
+                    Unpaid</label>
+                  <label class="radio-label"><input type="radio" name="paymentStatus" value="Paid" /> Paid</label>
+                </div>
+                <div id="paymentMethodBox" class="hidden">
+                  <label>Payment Method
+                    <select id="paymentMethod">
+                      <option value="">Select Method</option>
+                      <option value="Cash">Cash</option>
+                      <option value="Card">Card</option>
+                      <option value="Online Payment">Online Payment</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <h3>Item Details</h3>
+          <table class="items" id="itemsTable">
+            <thead>
+              <tr>
+                <th>Item No.</th>
+                <th>Description</th>
+                <th>Qty</th>
+                <th>Unit price</th>
+                <th>Discount</th>
+                <th>Amount</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+          <button class="link" id="addItemBtn">+ Add Item</button>
+
+          <div class="totals">
+            <div class="row">
+              <div>Invoice Subtotal</div>
+              <div id="subtotal">0.00</div>
+            </div>
+            <div class="row" id="taxRow">
+              <label for="taxRate">Tax Rate (%)</label>
+              <input id="taxRate" type="number" step="0.01" value="5" />
+            </div>
+            <div class="row" id="salesTaxRow">
+              <div>Sales Tax</div>
+              <div id="salesTax">0.00</div>
+            </div>
+            <div class="row">
+              <label for="advance">Adv. (if any)</label>
+              <input id="advance" type="number" step="0.01" value="0" />
+            </div>
+            <div class="row total">
+              <div>TOTAL</div>
+              <div id="grandTotal">0.00</div>
+            </div>
+          </div>
+
+          <div class="cta">
+            <button id="sendInvoice" class="primary">Send Invoice</button>
+            <button id="mobileViewBtn" class="btn-mobile-only primary">View Preview</button>
+            <button id="previewBtn">Preview</button>
+            <button id="downloadBtn">Download</button>
+          </div>
+        </section>
+
+        <section class="panel preview-panel">
+          <button id="mobileBackBtn" class="btn-mobile-only btn-outline" style="margin-bottom:16px">← Back to
+            Edit</button>
+          <div id="invoicePreview" class="invoice">
+            <div class="invoice-header redesigned">
+              <div class="header-left">
+                <img src="https://hoa-invoice-bice.vercel.app/assets/HOA%20NEW%20Logo.png" alt="HOA Mark"
+                  class="hoa-logo"
+                  onerror="this.src='https://hoa-invoice-bice.vercel.app/assets/LOGO%20Updating.png'; this.onerror=null;" />
+              </div>
+              <div class="header-right">
+                <div class="title">INVOICE</div>
+                <div class="meta">
+                  <div>Invoice No.: <span id="pInvoiceNo">HOA - 0080</span></div>
+                  <div>Invoice Date: <span id="pInvoiceDate">—</span></div>
+                  <div>Job: <span id="pJob">—</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="party-columns">
+              <div>
+                <strong>HOA Destinations LLC</strong><br />
+                6th Floor, Business Center,<br />
+                The Meydan Hotel Grandstand,<br />
+                Meydan Road, Nad Al Sheba, Dubai, UAE<br />
+                Ph.: +971 526652744 | Mob.: +91 8584849870<br />
+                info@hoaventures.com
+              </div>
+              <div>
+                <strong>Bill to:</strong> <span id="pClientName">—</span><br />
+                <strong>Address:</strong> <span id="pClientAddress">—</span><br />
+                <strong>Phone:</strong> <span id="pClientPhone">—</span>
+              </div>
+            </div>
+
+            <table class="invoice-table">
+              <thead>
+                <tr>
+                  <th>Item #</th>
+                  <th>Description</th>
+                  <th>Qty</th>
+                  <th>Unit price (AED)</th>
+                  <th>Discount</th>
+                  <th>Price (AED)</th>
+                </tr>
+              </thead>
+              <tbody id="pItems"></tbody>
+            </table>
+
+            <table class="summary">
+              <tbody>
+                <tr>
+                  <td>Invoice Subtotal</td>
+                  <td id="pSubtotal">0.00</td>
+                </tr>
+                <tr>
+                  <td>Tax Rate</td>
+                  <td><span id="pTaxRate">5</span>%</td>
+                </tr>
+                <tr>
+                  <td>Sales Tax</td>
+                  <td id="pSalesTax">0.00</td>
+                </tr>
+                <tr>
+                  <td>Adv. (if any)</td>
+                  <td id="pAdvance">0.00</td>
+                </tr>
+                <tr class="grand">
+                  <td>TOTAL</td>
+                  <td id="pGrandTotal">0.00</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="footer-flex">
+              <div class="footer-note">
+                This is a computer generated invoice
+                <br />Bank remittance charges are applicable separately by merchant. Credit card payments carry an
+                additional surcharge of 2.5%.
+                <br />For queries or feedback, mail us on info@hoaventures.com.
+                <br /><a href="https://www.hoaventures.com" target="_blank">www.hoaventures.com</a>
+              </div>
+              <img src="https://hoa-invoice-bice.vercel.app/assets/HOA%20STAMP.png" alt="Stamp" class="stamp"
+                id="stampImage" />
+            </div>
+          </div>
+        </section>
+      </section>
+
+
+      <!-- Dashboard Page -->
+      <section id="page-dashboard" class="hidden">
+        <section class="panel dashboard-panel">
+          <div class="dash-header">
+            <h2>Dashboard Overview</h2>
+          </div>
+
+          <!-- 4-Card Grid matching Image -->
+          <div class="dash-stats">
+            <!-- Card 1: Revenue -->
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value" id="dashRevenue">0.00</div>
+                <div class="stat-sub positive">+20.1% from last month</div>
+              </div>
+              <div class="mini-chart-container">
+                <canvas id="chartRevenue"></canvas>
+              </div>
+            </div>
+
+            <!-- Card 2: Invoices (Subscriptions style) -->
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total Invoices</div>
+                <div class="stat-value" id="dashTotal">0</div>
+                <div class="stat-sub positive">+5 new this month</div>
+              </div>
+              <div class="mini-chart-container">
+                <canvas id="chartInvoices"></canvas>
+              </div>
+            </div>
+
+            <!-- Card 3: Calendar Widget -->
+            <div class="stat-card calendar-card">
+              <div class="calendar-widget" id="dashCalendar">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+
+            <!-- Card 4: Overdue (Move Goal style) -->
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Overdue Amount</div>
+                <div class="stat-value" id="dashOverdue">0.00</div>
+                <div class="stat-sub" style="color:#8B2626">Action required</div>
+              </div>
+              <div class="mini-chart-container">
+                <canvas id="chartOverdue"></canvas>
+              </div>
+              <button class="btn-gold"
+                style="margin-top:12px;width:100%;background:#FFF9E6;color:#1A1A1A;border:1px solid #F4E0A3">View
+                Details</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+
+      <!-- Track Invoices Page -->
+      <!-- Expenses Page -->
+      <section id="page-expenses" class="hidden">
+        <section class="panel dashboard-panel">
+          <div class="dash-header">
+            <h2>Expenses & Payments</h2>
+            <div class="dash-controls">
+              <button id="addExpenseBtn" class="btn-gold">+ Add New Expense</button>
+            </div>
+          </div>
+
+          <!-- Expense Stats -->
+          <div class="dash-stats">
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">This Month</div>
+                <div class="stat-value" id="expMonth">0.00</div>
+                <div class="stat-sub positive" id="expMonthDiff">--</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Total YTD</div>
+                <div class="stat-value" id="expYear">0.00</div>
+                <div class="stat-sub">Jan 1 - Present</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Pending Payments</div>
+                <div class="stat-value" id="expPending">0.00</div>
+                <div class="stat-sub" style="color:#e53e3e" id="expPendingCount">0 transactions</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div>
+                <div class="stat-label">Top Category</div>
+                <div class="stat-value" style="font-size:24px" id="expTopCat">--</div>
+                <div class="stat-sub" id="expTopCatVal">0.00</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="grid two-cols" style="margin-bottom:24px">
+            <div class="chart-box" style="background:#fff;border-radius:12px;padding:20px;border:1px solid #eee">
+              <h3>Cash Flow (Rev vs Exp)</h3>
+              <div style="height:250px"><canvas id="chartCashFlow"></canvas></div>
+            </div>
+            <div class="chart-box" style="background:#fff;border-radius:12px;padding:20px;border:1px solid #eee">
+              <h3>Expense Breakdown</h3>
+              <div style="height:250px"><canvas id="chartExpCat"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Expense List -->
+          <div class="track-panel" style="background:#fff;border-radius:12px;padding:20px;border:1px solid #eee">
+            <div class="track-controls-bar" style="border:none;background:none;padding:0;margin-bottom:16px">
+              <div class="search-group">
+                <input id="expSearch" placeholder="Search Payee, ID..." />
+              </div>
+              <div class="filter-group">
+                <select id="expCatFilter">
+                  <option value="All">All Categories</option>
+                  <option value="Rent">Rent</option>
+                  <option value="Salaries">Salaries</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Supplies">Supplies</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Other">Other</option>
+                </select>
+                <select id="expStatusFilter">
+                  <option value="All">All Status</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+            </div>
+
+            <table class="items sortable" id="expTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Date</th>
+                  <th>Paid To</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expList"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- Add Expense Modal -->
+      <div id="expenseModal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close-modal" id="closeExpenseModal">&times;</span>
+          <h2 id="expModalTitle">Add Expense</h2>
+          <form id="expenseForm">
+            <input type="hidden" id="expId">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="expDate" required>
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <select id="expCategory" required>
+                  <option value="Rent">Rent</option>
+                  <option value="Salaries">Salaries</option>
+                  <option value="Utilities">Utilities</option>
+                  <option value="Supplies">Supplies</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Paid To</label>
+                <input type="text" id="expPayee" required placeholder="Vendor or Person">
+              </div>
+              <div class="form-group">
+                <label>Amount (AED)</label>
+                <input type="number" id="expAmount" required step="0.01" min="0">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <input type="text" id="expDesc" placeholder="Brief description">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Payment Mode</label>
+                <select id="expMode">
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Credit Card">Credit Card</option>
+                  <option value="Cheque">Cheque</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="expStatus">
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Upload Receipt</label>
+              <input type="file" id="expReceipt" accept="image/*,.pdf">
+            </div>
+            <div class="cta" style="margin-top:20px">
+              <button type="submit" class="btn-primary">Save Expense</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- Track Invoices Page -->
+      <section id="page-track" class="hidden">
+        <section class="panel track-panel">
+          <div class="dash-header">
+            <h2>Track Invoices</h2>
+            <div class="dash-controls">
+              <button id="toggleTrackView" class="btn-gold btn-outline">Show Calendar View</button>
+              <button id="exportXlsx" class="btn-gold">Download Excel</button>
+            </div>
+          </div>
+
+          <!-- Summary Strip -->
+          <div class="track-summary">
+            <div class="t-sum-item">
+              <span class="label">Filtered Invoices:</span>
+              <strong id="trackSumCount">0</strong>
+            </div>
+            <div class="t-sum-item">
+              <span class="label">Total Value:</span>
+              <strong id="trackSumTotal">0.00</strong>
+            </div>
+            <div class="t-sum-item">
+              <span class="label">Unpaid / Due:</span>
+              <strong id="trackSumUnpaid" style="color:#e53e3e">0.00</strong>
+            </div>
+          </div>
+
+          <!-- Track Calendar Container -->
+          <div id="trackCalendarContainer" class="track-calendar-container hidden">
+            <div class="calendar-widget" id="trackCalendar"></div>
+          </div>
+
+          <div class="track-controls-bar">
+            <div class="search-group">
+              <input id="trackSearch" placeholder="Search Client, Job, or Inv #..." />
+            </div>
+            <div class="filter-group">
+              <select id="trackStatusFilter">
+                <option value="All">All Status</option>
+                <option value="Paid">Paid</option>
+                <option value="Unpaid">Unpaid</option>
+                <option value="Overdue">Overdue</option>
+              </select>
+              <span class="sep">|</span>
+              <input id="trackStart" type="date" title="Start Date" />
+              <span style="color:var(--muted)">to</span>
+              <input id="trackEnd" type="date" title="End Date" />
+              <button id="trackClearFilters" class="text-btn">Clear</button>
+            </div>
+          </div>
+
+          <table class="items sortable" id="trackTable">
+            <thead>
+              <tr>
+                <th data-sort="no">Invoice No. <span class="sort-icon">⇅</span></th>
+                <th data-sort="date">Date <span class="sort-icon">⇅</span></th>
+                <th data-sort="billTo">Bill To <span class="sort-icon">⇅</span></th>
+                <th data-sort="job">Job <span class="sort-icon">⇅</span></th>
+                <th data-sort="total">Total (AED) <span class="sort-icon">⇅</span></th>
+                <th data-sort="status">Status <span class="sort-icon">⇅</span></th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="trackList"></tbody>
+          </table>
+          <div id="trackEmptyState" class="empty-message hidden">
+            No invoices found matching your filters.
+          </div>
+        </section>
+      </section>
+
+      <!-- View Invoice Modal -->
+      <div id="viewModal" class="modal hidden">
+        <div class="modal-card" style="width:840px;max-width:95vw">
+          <div id="viewInvoice" class="invoice"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+            <button id="viewClose">Close</button>
+            <button id="viewDownload">Download PDF</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mail Modal -->
+      <div id="mailModal" class="modal hidden">
+        <div class="modal-card">
+          <h3>Email Invoice</h3>
+          <label>Email address
+            <input type="email" id="mailRecipient" placeholder="client@example.com" />
+          </label>
+          <p id="mailStatus" style="display:none;font-size:12px;margin:8px 0"></p>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button id="mailCancel" class="btn btn-small">Cancel</button>
+            <button id="mailSend" class="btn btn-small btn-primary">Compose Email</button>
+          </div>
+          <p style="color:#666;font-size:12px;margin-top:8px">Tip: Download the PDF first and attach it in your email
+            client.</p>
+        </div>
+      </div>
+
+      <!-- Profile Modal -->
+      <div id="profileModal" class="modal hidden">
+        <div class="modal-card wide">
+          <h3>Your Profile</h3>
+          <div class="row">
+            <div class="avatar-preview"><img id="profileAvatarImg" alt="" style="display:none" /></div>
+            <div style="flex:1">
+              <label>Display name
+                <input type="text" id="profileName" placeholder="Your name" />
+              </label>
+              <label>Upload photo
+                <input type="file" id="avatarFile" accept="image/*" />
+              </label>
+            </div>
+          </div>
+          <p id="profileStatus" style="display:none;font-size:12px;margin:8px 0"></p>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+            <button id="profileClose" class="btn btn-small">Close</button>
+            <button id="profileSave" class="btn btn-small btn-primary">Save Changes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Page -->
+      <section id="page-login" class="hidden">
+        <section class="login-panel">
+          <div class="login-card">
+            <div class="login-illustration">
+              <div class="illust-frame">
+                <img src="https://hoa-invoice-bice.vercel.app/assets/LOGO%20Updating.png" alt="HOA Ventures"
+                  onerror="this.src='https://hoa-invoice-bice.vercel.app/assets/LOGO%20Updating.png'; this.onerror=null;" />
+              </div>
+            </div>
+            <div class="login-form">
+              <h2>Log in</h2>
+              <p class="sub">Hello, friend! Welcome to HOA Ventures portal. Please sign in to continue.</p>
+              <label>Email
+                <input type="email" id="loginEmail" placeholder="Email" />
+              </label>
+              <label>Password
+                <input type="password" id="loginPassword" placeholder="Password" />
+              </label>
+              <div class="cta">
+                <button id="loginBtn" class="btn btn-primary pill">Let’s start!</button>
+              </div>
+              <p id="loginError" class="login-msg error" style="display:none"></p>
+              <p id="loginInfo" class="login-msg info" style="display:none"></p>
+              <button id="resetPasswordBtn" class="link" style="margin-top:10px">Reset password</button>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>Contact Information</h3>
+      <p><strong>Name:</strong> Surya Prasad Nayak</p>
+      <p><strong>Phone:</strong> 9937404274</p>
+      <p><strong>Email:</strong> contact@suryaprasadnayak.in</p>
+      <button id="closeHelp">Close</button>
+    </div>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase project configuration
+    window.SUPABASE_URL = 'https://wqahbzrugjoyaznpkemc.supabase.co';
+    window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxYWhienJ1Z2pveWF6bnBrZW1jIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2MzA5NjIsImV4cCI6MjA3ODIwNjk2Mn0.5MzXattXdlQZyrgCjlsN6JnJVlbRVF81LLY4GWHhu38';
+  </script>
+  <script src="/app.js"></script>
+</body>
+
+</html>
